@@ -1,6 +1,6 @@
 {
 	"name": "gulp-web-images-css",
-	"version": "1.1.8",
+	"version": "1.2.0",
 	"description": "Gulp plugin to use webp & avif in CSS. Fork on the plugin gulp-avif-css.",
 	"main": "index.js",
 	"scripts": {

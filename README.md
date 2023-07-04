@@ -37,6 +37,20 @@ Default: `true`
 
 Do not distinguish between lowercase and uppercase letters in extensions
 
+### avifClass
+
+Type: `string`<br>
+Default: `avif`
+
+Sets a class for AVIF-picture
+
+### webpClass
+
+Type: `string`<br>
+Default: `webp`
+
+Sets a class for Webp-picture
+
 ## Usage
 
 Add it to your `gulpfile.js`

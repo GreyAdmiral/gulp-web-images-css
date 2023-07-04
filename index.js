@@ -2,115 +2,119 @@ const through = require('through2');
 const css = require('css');
 
 class WebImagesCSS {
-  constructor() {
-	 this.unregister = true;
-    this.extensions = ["png", "jpg", "jpeg"];
-	 this.mode = "all";
-  }
-
-  init = (options = {}) => {
-	Object.assign(this, options, {webExt: ['avif', 'webp']});
-	if (this.unregister) {
-		this.avaibleExtensions = [...new Set(this.extensions.concat(this.extensions.map((it) => it.toUpperCase())))];
-	} else {
-		this.avaibleExtensions = this.extensions;
+	constructor() {
+		this.unregister = true;
+		this.extensions = ['png', 'jpg', 'jpeg'];
+		this.mode = "all";
+		this.webpClass = "webp";
+		this.avifClass = "avif";
 	}
-	if (this.mode == "avif") {
-		this.webExt = ['avif'];
-	} else if (this.mode == "webp") {
-		this.webExt = ['webp'];
+
+	init = (options = {}) => {
+		Object.assign(this, options);
+		if (this.unregister) {
+			this.avaibleExtensions = [...new Set(this.extensions.concat(this.extensions.map((it) => it.toUpperCase())))];
+		} else {
+			this.avaibleExtensions = this.extensions;
+		}
+		if (this.mode == "avif") {
+			this.webExt = [this.avifClass];
+		} else if (this.mode == "webp") {
+			this.webExt = [this.webpClass];
+		} else {
+			this.webExt = [this.avifClass, this.webpClass];
+		}
+		return through.obj((buffer, _, callback) => {
+			if (buffer.isNull()) {
+			return callback(null, buffer);
+			} else if (buffer.isStream()) {
+			return callback(null, buffer);
+			}
+
+			this.buffer = buffer;
+			this.fileData = buffer.contents.toString();
+			this.transform();
+
+			callback(null, this.buffer);
+		})
 	}
-    return through.obj((buffer, _, callback) => {
-      if (buffer.isNull()) {
-        return callback(null, buffer);
-      } else if (buffer.isStream()) {
-        return callback(null, buffer);
-      }
 
-      this.buffer = buffer;
-      this.fileData = buffer.contents.toString();
-      this.transform();
+	transform(rules = this.parseCSS()) {
+		rules.forEach((expression) => {
+			if (expression.type === 'media') {
+			return this.transform(expression.rules);
+			} else if (expression.type === 'rule') {
+			expression.declarations
+			.forEach((rule) => {
+				if (!this.isBackground(rule)) return;
 
-      callback(null, this.buffer);
-    })
-  }
+				const imageExtension = this.getExtension(rule);
 
-  transform(rules = this.parseCSS()) {
-    rules.forEach((expression) => {
-      if (expression.type === 'media') {
-        return this.transform(expression.rules);
-      } else if (expression.type === 'rule') {
-        expression.declarations
-        .forEach((rule) => {
-          if (!this.isBackground(rule)) return;
+				if (!imageExtension) return;
 
-          const imageExtension = this.getExtension(rule);
+				this.createExpressions({
+					rule,
+					selectors: expression.selectors,
+					position: expression.type === 'media'
+					? rule.position
+					: expression.position,
+					imageExtension
+				})
+			})
+			}
+		})
 
-          if (!imageExtension) return;
+		this.buffer.contents = new Buffer.from(this.fileData);
+	}
 
-          this.createExpressions({
-            rule,
-            selectors: expression.selectors,
-            position: expression.type === 'media'
-              ? rule.position
-              : expression.position,
-            imageExtension
-          })
-        })
-      }
-    })
+	parseCSS() {
+		return css.parse(this.fileData).stylesheet.rules;
+	}
 
-    this.buffer.contents = new Buffer.from(this.fileData);
-  }
+	isBackground({ property, value }) {
+		if (
+			property === 'background' ||
+			property === 'background-image' &&
+			value.indexOf("." + this.webpClass) < 0 &&
+			value.indexOf("." + this.avifClass) < 0
+		) {
+			return true;
+		}
+	}
 
-  parseCSS() {
-    return css.parse(this.fileData).stylesheet.rules;
-  }
+	getExtension({ value }) {
+		return this.avaibleExtensions.find((extension) => {
+			if (value.indexOf(extension) > 0) {
+			return extension;
+			}
+		})
+	}
 
-  isBackground({ property, value }) {
-    if (
-      property === 'background' ||
-      property === 'background-image' &&
-      value.indexOf('.webp') < 0 &&
-      value.indexOf('.avif') < 0
-    ) {
-      return true;
-    }
-  }
+	createExpressions({ rule, selectors, position, imageExtension }) {
+		const splitedData = this.fileData.split(/\n/);
 
-  getExtension({ value }) {
-    return this.avaibleExtensions.find((extension) => {
-      if (value.indexOf(extension) > 0) {
-        return extension;
-      }
-    })
-  }
+		const rowIndex = position.end.line - 1;
+		const columnIndex = position.end.column - 1;
 
-  createExpressions({ rule, selectors, position, imageExtension }) {
-    const splitedData = this.fileData.split(/\n/);
+		;this.webExt.forEach((modernExtension) => {
+			splitedData.splice(rowIndex, 1, this.changeString(
+			splitedData[rowIndex],
+			columnIndex,
+			`
+				.${modernExtension} ${selectors.join('')} {
+					${rule.property}: ${rule.value.replace(imageExtension, modernExtension)}
+				}
+			`.replaceAll('\n', '')
+			)
+			)
+		})
 
-    const rowIndex = position.end.line - 1;
-    const columnIndex = position.end.column - 1;
+		this.fileData = splitedData.join('\n');
+	}
 
-    ;this.webExt.forEach((modernExtension) => {
-      splitedData.splice(rowIndex, 1, this.changeString(
-        splitedData[rowIndex],
-        columnIndex,
-        `
-          .${modernExtension} ${selectors.join('')} {
-            ${rule.property}: ${rule.value.replace(imageExtension, modernExtension)}
-          }
-        `.replaceAll('\n', '')
-        )
-      )
-    })
-
-    this.fileData = splitedData.join('\n');
-  }
-
-  changeString(string, changeIndex, changeText) {
-    return string.substring(0, changeIndex) + changeText + string.substring(changeIndex);
-  }
+	changeString(string, changeIndex, changeText) {
+		return string.substring(0, changeIndex) + changeText + string.substring(changeIndex);
+	}
 }
 
 const webImagesCSS = new WebImagesCSS();
