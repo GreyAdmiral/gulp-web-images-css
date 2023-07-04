@@ -1,0 +1,26 @@
+{
+	"name": "gulp-web-images-css",
+	"version": "1.1.5",
+	"description": "Gulp plugin to use webp & avif in CSS. Fork on the plugin gulp-avif-css.",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/GreyAdmiral/gulp-web-images-css.git"
+	},
+	"keywords": [
+		"gulp",
+		"avif",
+		"webp",
+		"css"
+	],
+	"author": "Binarion",
+	"homepage": "https://github.com/GreyAdmiral",
+	"license": "MIT",
+	"dependencies": {
+		"css": "^3.0.0",
+		"through2": "^4.0.2"
+	}
+}
