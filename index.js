@@ -4,7 +4,7 @@ const css = require('css');
 class WebImagesCSS {
   constructor() {
 	 this.unregister = true;
-    this.avaibleExtensions = ['png', 'jpg', 'jpeg'];
+    this.extensions = ["png", "jpg", "jpeg"];
 	 this.mode = "all";
   }
 
