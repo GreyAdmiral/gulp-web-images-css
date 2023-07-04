@@ -55,9 +55,9 @@ const gulp = require("gulp");
 const webImagesCSS = require("gulp-web-images-css");
 
 gulp
-	.src("./src/css/*.css")
-	.pipe(webImagesCSS({mode: "all"}))
-	.pipe(gulp.dest("./dist"));
+   .src("./src/css/*.css")
+   .pipe(webImagesCSS({mode: "all"}))
+   .pipe(gulp.dest("./dist"));
 ```
 
 Include special plugin adds `.avif` and `.webp` classes to body (if it supports) into your JavaScript file (add it into head tag)
@@ -72,7 +72,7 @@ import "gulp-web-images-css/plugin";
 
 ```css
 .box {
-	background-image: url("image.png");
+   background-image: url("image.png");
 }
 ```
 
@@ -80,14 +80,14 @@ import "gulp-web-images-css/plugin";
 
 ```css
 .box {
-	background-image: url("image.png");
+   background-image: url("image.png");
 }
 
 .webp .box {
-	background-image: url("image.webp");
+   background-image: url("image.webp");
 }
 
 .avif .box {
-	background-image: url("image.avif");
+   background-image: url("image.avif");
 }
 ```
