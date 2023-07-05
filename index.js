@@ -3,9 +3,10 @@ const css = require('css');
 
 class WebImagesCSS {
 	constructor() {
+		this.mode = "all";
+		this.localMode = true;
 		this.unregister = true;
 		this.extensions = ['png', 'jpg', 'jpeg'];
-		this.mode = "all";
 		this.webpClass = "webp";
 		this.avifClass = "avif";
 	}
@@ -71,7 +72,7 @@ class WebImagesCSS {
 		return css.parse(this.fileData).stylesheet.rules;
 	}
 
-	isBackground({ property, value }) {
+	isBackground({property, value}) {
 		if (
 			property === 'background' ||
 			property === 'background-image' &&
@@ -82,10 +83,16 @@ class WebImagesCSS {
 		}
 	}
 
-	getExtension({ value }) {
+	getExtension({value}) {
 		return this.avaibleExtensions.find((extension) => {
 			if (value.indexOf(extension) > 0) {
-			return extension;
+				if (this.localMode) {
+					if (!~value.search(/^url\((["'])?http(s)?\:\/\//i)) {
+						return extension;
+					}
+				} else {
+					return extension;
+				}
 			}
 		})
 	}

@@ -14,13 +14,6 @@ npm i -D gulp-web-images-css
 
 Type: `object`
 
-### extensions
-
-Type: `array`<br>
-Default: `['png', 'jpg', 'jpeg']`
-
-Expansion subject to processing.
-
 ### mode
 
 Type: `string`<br>
@@ -29,6 +22,12 @@ Possible values:
    -  «avif» — Add only support «AVIF»
    -  «webp» — Add only support «Webp»
    -  «all» — Add support «AVIF» and «Webp»
+
+### localMode
+Type: `boolean`<br>
+Default: `true`
+
+Make only local paths.
 
 ### unregister
 
@@ -50,6 +49,13 @@ Type: `string`<br>
 Default: `webp`
 
 Sets a class for Webp-picture
+
+### extensions
+
+Type: `array`<br>
+Default: `['png', 'jpg', 'jpeg']`
+
+Expansion subject to processing.
 
 ## Usage
 
