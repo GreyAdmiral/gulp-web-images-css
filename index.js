@@ -11,6 +11,15 @@ class WebImagesCSS {
 		this.avifClass = "avif";
 	}
 
+   /**
+    * @param {object} [options]
+    * @param {"avif" | "webp" | "all"} [options.mode]
+    * @param {boolean} [options.localMode]
+    * @param {boolean} [options.unregister]
+    * @param {string} [options.avifClass]
+    * @param {string} [options.webpClass]
+    * @param {Array<string>} [options.extensions]
+    */
 	init = (options = {}) => {
 		Object.assign(this, options);
 		if (this.unregister) {
